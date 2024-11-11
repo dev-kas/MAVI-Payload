@@ -1,0 +1,3 @@
+([('main',
+   '/Users/anupriyaverma/Documents/MAVI/MAVI-Controller/dist/main',
+   'EXECUTABLE')],)
