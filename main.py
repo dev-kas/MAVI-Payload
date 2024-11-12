@@ -9,7 +9,7 @@ import config
 
 print('Program started.')
 
-socket = socketio.Client(logger=False, reconnection_attempts=9999999, reconnection=True, reconnection_delay=5, reconnection_delay_max=50)
+socket = socketio.Client(logger=True, reconnection_attempts=9999999, reconnection=True, reconnection_delay=5, reconnection_delay_max=50)
 ptys = {}
 
 @socket.event
