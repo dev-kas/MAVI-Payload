@@ -8,7 +8,8 @@ import socketio
 from info import get_info
 import pty
 import config
-# from autoupdater import check_for_updates, perform_update
+import stat
+from pathlib import Path
 
 print('Program started.')
 
@@ -81,7 +82,82 @@ def killPTY(ptyID):
     ptys[ptyID]["proc"].terminate()
     del ptys[ptyID]
 
+@socket.event
+def lsla_intget(data):
+    path = data["path"] if data["path"] is not None else str(Path.home())
+    client = data["client"]
 
+    draft = lsla_pdata(path)
+    
+    socket.emit("lsla_retget", {"data": draft, "client": client, "path": path})
+    print(draft)
+
+@socket.event
+def lsla_intback(data):
+    path = Path(data["path"])
+    client = data["client"]
+    path = str(path.parent)
+    draft = lsla_pdata(path)
+    
+    socket.emit("lsla_retget", {"data": draft, "client": client, "path": path})
+    print(draft)
+
+@socket.event
+def lsla_intdownload(data):
+    path = data["path"]
+    client = data["client"]
+
+    if os.path.isfile(path) and os.access(path, os.R_OK):
+        with open(path, 'rb') as f:
+            data = f.read()
+        chunk_size = 200 * 1024 # 200kb
+        chunks = [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+        for i, chunk in enumerate(chunks):
+            socket.emit("lsla_retdownload", {"data": chunk, "client": client, "path": path, "chunk": i+1, "total": len(chunks)})
+    else:
+        print(f"Path is not a readable file: {path}")
+
+def lsla_pdata(path):
+    draft = []
+
+    try:
+        entries = os.listdir(path)
+    except FileNotFoundError:
+        print(f"Path not found: {path}")
+        return draft
+    except PermissionError:
+        print(f"Permission denied to access: {path}")
+        return draft
+
+    for entry in entries:
+        entry_path = os.path.join(path, entry)
+
+        name = entry
+        full_path = os.path.abspath(entry_path)
+        entry_type = "dir" if os.path.isdir(entry_path) else "file"
+        size = None
+        perms = None
+
+        try:
+            size = os.path.getsize(entry_path)
+        except:
+            size = 0
+        
+        try:
+            perms = oct(os.stat(entry_path).st_mode)[-3:]
+        except:
+            perms = "888"
+
+        entry_info = {
+            "name": name,
+            "fpath": full_path,
+            "type": entry_type,
+            "size": size,
+            "perms": perms
+        }
+
+        draft.append(entry_info)
+    return draft
 
 def main():
     try:
