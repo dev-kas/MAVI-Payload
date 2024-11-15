@@ -25,7 +25,7 @@ startProcess() {
         ;;
     2)
         echo "Building..."
-        pyinstaller --onefile --windowed main.py
+        pyinstaller --onefile --noconsole main.py
         ;;
     3)
         echo "Installing..."
