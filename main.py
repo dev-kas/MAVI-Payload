@@ -10,6 +10,7 @@ import pty
 import config
 import stat
 from pathlib import Path
+from time import sleep
 
 print('Program started.')
 
@@ -114,6 +115,7 @@ def lsla_intdownload(data):
         chunks = [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
         for i, chunk in enumerate(chunks):
             socket.emit("lsla_retdownload", {"data": chunk, "client": client, "path": path, "chunk": i+1, "total": len(chunks)})
+            sleep(0.25)
     else:
         print(f"Path is not a readable file: {path}")
 
