@@ -75,13 +75,22 @@ def spawnPTY(data):
 @socket.event
 def disconnect():
     print("disconnected")
-    for ptyID in ptys:
+    for ptyID in list(ptys.keys()):
+    try:
         killPTY(ptyID)
+    except Exception as e:
+        print(f"Failed to kill PTY {ptyID}: {e}")
 
 @socket.event
 def killPTY(ptyID):
-    ptys[ptyID]["proc"].terminate()
-    del ptys[ptyID]
+    if ptyID not in ptys:
+        return
+    try:
+        ptys[ptyID]["proc"].terminate()
+    except Exception as e:
+        print(f"Error terminating {ptyID}: {e}")
+    finally:
+        del ptys[ptyID]
 
 @socket.event
 def lsla_intget(data):
