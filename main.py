@@ -76,10 +76,10 @@ def spawnPTY(data):
 def disconnect():
     print("disconnected")
     for ptyID in list(ptys.keys()):
-    try:
-        killPTY(ptyID)
-    except Exception as e:
-        print(f"Failed to kill PTY {ptyID}: {e}")
+        try:
+            killPTY(ptyID)
+        except Exception as e:
+            print(f"Failed to kill PTY {ptyID}: {e}")
 
 @socket.event
 def killPTY(ptyID):
